@@ -24,24 +24,19 @@ app.engine('handlebars', handlebars.engine({
 }));
 
 
-// flash data settings
-app.use(session({
-	secret: "a_any_key_for_this_project",
-	resave: false,
-	saveUninitialized: false
-}))
-app.use(flash())
+sequelize
+  .sync()
+  .then(() => {
+    console.log("Database synced sucessfully");
+  })
+  .catch((error) => {
+    console.error("Error syncing database:", error);
+  });
 
 // view settings
 app.set('views', path.join("./views"))
 app.set('view engine','handlebars')
 // middlewere to treat flash messages
-app.use((req,res,next) => {
-	res.locals.success_msg = req.flash("success_msg")
-	res.locals.error_msg = req.flash('error_msg')
-	res.locals.errors = req.session.errors
-	next()
-})
 
 app.use('/users', (req, res, next) => {
 	console.log('will run before users route');
@@ -53,3 +48,5 @@ app.use(appRoutes)
 app.listen(3000, () => {
 	console.log('app is running');
 });
+
+

@@ -8,16 +8,21 @@ const empregados = require('../models/empregados')(sequelize,Sequelize)
 // function to make suitable validation to attached as a middleware to routers file
 
 exports.showForm = async (req,res) => {
-    const empregados = await empregados.findAll({
+    const empregadosResultados = await empregados.findAll({
         order: [['id','ASC']]
     })
-    res.render("myresult", {empregados});
+    res.render("myresult", {empregadosResultados});
 }
 
-exports.add = (req,res) => {
+exports.formAdd = (req,res) => {
     res.render("myform");
 }
 
+exports.addEmpregado = async (req,res) => {
+    const { nome, salario_bruto, depart } = req.body;
+    await empregados.create({ nome, salario_bruto, depart });
+    res.redirect('/');
+}
 
 // exports.edit = (req,res) => {
 //     const id_param = req.params.id;
