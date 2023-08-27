@@ -1,114 +1,125 @@
 const { sequelize, Sequelize } = require ('../config/database')
 
-const livrosModel = require('../models/livros')(sequelize,Sequelize)
+const empregados = require('../models/empregados')(sequelize,Sequelize)
 
 // validator
-const { validationResult } = require('express-validator');
+// const { validationResult } = require('express-validator');
 
 // function to make suitable validation to attached as a middleware to routers file
 
-exports.showForm = (req,res) => {
-    res.render("myform", {layout: false});
-}
-
-exports.edit = (req,res) => {
-    const id_param = req.params.id;
-
-    livrosModel.findByPk(id_param).then(results => {
-        //console.log('results'+results.json)
-
-        res.render("myformedit", {layout: false,id:id_param,resultado:results});
-
-    }).catch(err => {
-        console.log("Error" + err)
-        res.status(500).send({message:"Error" + err.message})
+exports.showForm = async (req,res) => {
+    const empregados = await empregados.findAll({
+        order: [['id','ASC']]
     })
+    res.render("myresult", {empregados});
 }
 
-exports.update = (req,res) => {
-    const id_param = req.params.id;
-    console.log("UPDATE: "+id_param)
-    livrosModel.update({
-        description: req.body.description,
-        title: req.body.title
-    },
-    {
-        where: { id: id_param }
-    }
-   ).then(num => {
-        if (!num) {
-            req.status(400).send({message: "An error ocurred when trying to update this object"})
-        }
-        res.redirect('/show');
-    }).catch(err => {
-        res.status(500).send({
-          message: "Error updating"
-        });
-      });
+exports.add = (req,res) => {
+    res.render("myform");
 }
 
 
-exports.save = (req,res) => {
+// exports.edit = (req,res) => {
+//     const id_param = req.params.id;
 
-    const errors = validationResult(req)
-    if(!errors.isEmpty()) {
-        req.session.errors = errors.array()
-        return res.redirect('/')
-    }
+//     livrosModel.findByPk(id_param).then(results => {
+//         //console.log('results'+results.json)
 
-    const bookSetData = {
-        title: req.body.title,
-        description: req.body.description
-    };
+//         res.render("myformedit", {layout: false,id:id_param,resultado:results});
 
-    livrosModel.create(bookSetData).then (data => {
-        console.log('Data saved');
-        req.flash("success_msg","Data saved successful.")
-        req.session.errors = null
-        res.redirect('/')
-    }).catch(err => {
-        console.log("Error" + err)
-    })
+//     }).catch(err => {
+//         console.log("Error" + err)
+//         res.status(500).send({message:"Error" + err.message})
+//     })
+// }
 
-}
-
-
-exports.delete = (req,res) => {
-    console.log ("Elemento:"+req.params.id);
-    const id_param = req.params.id;
-
-    livrosModel.destroy({
-        where: { id:id_param }
-    }).then((result) => {
-
-       if (!result){
-            req.status(400).json({message:"An error ocurred"})
-        }
-
-        res.redirect('/show')
+// exports.update = (req,res) => {
+//     const id_param = req.params.id;
+//     console.log("UPDATE: "+id_param)
+//     livrosModel.update({
+//         description: req.body.description,
+//         title: req.body.title
+//     },
+//     {
+//         where: { id: id_param }
+//     }
+//    ).then(num => {
+//         if (!num) {
+//             req.status(400).send({message: "An error ocurred when trying to update this object"})
+//         }
+//         res.redirect('/show');
+//     }).catch(err => {
+//         res.status(500).send({
+//           message: "Error updating"
+//         });
+//       });
+// }
 
 
-    }).catch( (err) => {
-        res.status(500).json({message:"Could not delete object"});
-        console.log(err);
-    }  ) // then
-}
+// exports.save = (req,res) => {
 
-exports.showResult = (req,res) => {
+//     const errors = validationResult(req)
+//     if(!errors.isEmpty()) {
+//         req.session.errors = errors.array()
+//         return res.redirect('/')
+//     }
 
-    livrosModel.findAll(
-        {
-            order: [['title','ASC']]
+//     const bookSetData = {
+//         title: req.body.title,
+//         description: req.body.description
+//     };
 
-    }).then(results => {
-        //console.log('results'+results.json)
+//     livrosModel.create(bookSetData).then (data => {
+//         console.log('Data saved');
+//         req.flash("success_msg","Data saved successful.")
+//         req.session.errors = null
+//         res.redirect('/')
+//     }).catch(err => {
+//         console.log("Error" + err)
+//     })
 
-        res.render("myresult", {resultado:results});
+// }
 
-    }).catch(err => {
-        console.log("Error" + err)
-        res.status(500).send({message:"Error" + err.message})
-    })
+
+// exports.delete = (req,res) => {
+//     console.log ("Elemento:"+req.params.id);
+//     const id_param = req.params.id;
+
+//     livrosModel.destroy({
+//         where: { id:id_param }
+//     }).then((result) => {
+
+//        if (!result){
+//             req.status(400).json({message:"An error ocurred"})
+//         }
+
+//         res.redirect('/show')
+
+
+//     }).catch( (err) => {
+//         res.status(500).json({message:"Could not delete object"});
+//         console.log(err);
+//     }  ) // then
+// }
+
+// exports.showResult = (req,res) => {
+
+//     livrosModel.findAll(
+//         {
+//             order: [['title','ASC']]
+
+//     }).then(results => {
+//         //console.log('results'+results.json)
+
+//         res.render("myresult", {resultado:results});
+
+//     }).catch(err => {
+//         console.log("Error" + err)
+//         res.status(500).send({message:"Error" + err.message})
+//     })
     
-}
+// }
+
+
+
 

@@ -1,7 +1,10 @@
 const Sequelize = require('sequelize')
 
-sequelize = new Sequelize ('AulaLivros','root','',{
+sequelize = new Sequelize ({
+    database: 'impostobd',
+    password: '',
     host: 'localhost',
+    username: 'root',
     dialect:'mysql'
 } )
 
