@@ -1,3 +1,4 @@
+const { salarioLiquido } = require('../salarioLiquido');
 
 module.exports = (sequelize, DataTypes) => {
     const empregados = sequelize.define('empregados', {
@@ -12,22 +13,28 @@ module.exports = (sequelize, DataTypes) => {
         salario_bruto: {
             type: DataTypes.DECIMAL(10, 2)
         },
+        salario_liquido: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return salarioLiquido(this.salario_bruto);
+            }
+        },
         depart: {
             type: DataTypes.ENUM('1', '2', '3', '4')
         }
     }, {
         timestamps: false,
-        // getterMethods: {
-        //     nomeDepartamento() {
-        //         const departamentos = [
-        //             'Administrativo',
-        //             'Designer',
-        //             'Contabilidade',
-        //             'Fábrica'
-        //         ];
-        //         return departamentos.at(parseInt(this.departamento) - 1);
-        //     }
-        // }
+        getterMethods: {
+            departamento() {
+                const depart = [
+                    'Administrativo',
+                    'Designer',
+                    'Contabilidade',
+                    'Fábrica'
+                ];
+                return depart.at(parseInt(this.depart) - 1);
+            }
+        }
     });
 
     return empregados;

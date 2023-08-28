@@ -7,10 +7,11 @@ const empregados = require('../models/empregados')(sequelize,Sequelize)
 
 // function to make suitable validation to attached as a middleware to routers file
 
-exports.showForm = async (req,res) => {
+exports.pagResultado = async (req,res) => {
     const empregadosResultados = await empregados.findAll({
         order: [['id','ASC']]
     })
+    // console.log(empregadosResultados)
     res.render("myresult", {empregadosResultados});
 }
 
@@ -24,107 +25,41 @@ exports.addEmpregado = async (req,res) => {
     res.redirect('/');
 }
 
-// exports.edit = (req,res) => {
-//     const id_param = req.params.id;
+exports.deletarEmpregado = async (req, res) => {
+    const id = req.params.id;
+        const empregadosResultados = await empregados.findAll({
+        order: [['id','ASC']]
+    })
+    await empregados.destroy({ where: { id } });
+    res.redirect('/');
+};
 
-//     livrosModel.findByPk(id_param).then(results => {
-//         //console.log('results'+results.json)
+exports.formEditar = async (req,res) => {
+    const id = req.params.id;
+    const empregadoResultado = await empregados.findByPk(id);
+    res.render("myformedit", {empregadoResultado});
+}
 
-//         res.render("myformedit", {layout: false,id:id_param,resultado:results});
-
-//     }).catch(err => {
-//         console.log("Error" + err)
-//         res.status(500).send({message:"Error" + err.message})
-//     })
-// }
-
-// exports.update = (req,res) => {
-//     const id_param = req.params.id;
-//     console.log("UPDATE: "+id_param)
-//     livrosModel.update({
-//         description: req.body.description,
-//         title: req.body.title
-//     },
-//     {
-//         where: { id: id_param }
-//     }
-//    ).then(num => {
-//         if (!num) {
-//             req.status(400).send({message: "An error ocurred when trying to update this object"})
-//         }
-//         res.redirect('/show');
-//     }).catch(err => {
-//         res.status(500).send({
-//           message: "Error updating"
-//         });
-//       });
-// }
+exports.editarEmpregado = async (req,res) => {
+    const id = req.params.id;
+    const {nome, salario_bruto, depart } = req.body;
+    await empregados.update({nome, salario_bruto, depart}, { where: {id}});
+    res.redirect('/');
+}
 
 
-// exports.save = (req,res) => {
-
-//     const errors = validationResult(req)
-//     if(!errors.isEmpty()) {
-//         req.session.errors = errors.array()
-//         return res.redirect('/')
-//     }
-
-//     const bookSetData = {
-//         title: req.body.title,
-//         description: req.body.description
-//     };
-
-//     livrosModel.create(bookSetData).then (data => {
-//         console.log('Data saved');
-//         req.flash("success_msg","Data saved successful.")
-//         req.session.errors = null
-//         res.redirect('/')
-//     }).catch(err => {
-//         console.log("Error" + err)
-//     })
-
-// }
-
-
-// exports.delete = (req,res) => {
-//     console.log ("Elemento:"+req.params.id);
-//     const id_param = req.params.id;
-
-//     livrosModel.destroy({
-//         where: { id:id_param }
-//     }).then((result) => {
-
-//        if (!result){
-//             req.status(400).json({message:"An error ocurred"})
-//         }
-
-//         res.redirect('/show')
-
-
-//     }).catch( (err) => {
-//         res.status(500).json({message:"Could not delete object"});
-//         console.log(err);
-//     }  ) // then
-// }
-
-// exports.showResult = (req,res) => {
-
-//     livrosModel.findAll(
-//         {
-//             order: [['title','ASC']]
-
-//     }).then(results => {
-//         //console.log('results'+results.json)
-
-//         res.render("myresult", {resultado:results});
-
-//     }).catch(err => {
-//         console.log("Error" + err)
-//         res.status(500).send({message:"Error" + err.message})
-//     })
-    
-// }
-
-
+exports.filtro = async (req,res) => {
+    const Op = Sequelize.Op;
+    const {filtro, salario} = req.body;
+    const {setor} = req.body;
+    console.log(salario)
+    let empregadosResultados;
+    if(setor == 0){
+        empregadosResultados = await empregados.findAll({ where: {nome: {[Op.substring]: filtro}}, order: [['salario_bruto',salario]]});
+    }else{
+        empregadosResultados = await empregados.findAll({ where: {nome: {[Op.substring]: filtro}, depart: setor}, order: [['salario_bruto',salario]]});
+    }
+    res.render("myresult", {empregadosResultados});
+}
 
 
